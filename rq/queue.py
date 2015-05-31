@@ -14,8 +14,10 @@ from .job import Job, JobStatus
 from .utils import import_attribute, utcnow
 
 
-def get_failed_queue(connection=None):
+def get_failed_queue(connection=None, queue_name=None):
     """Returns a handle to the special failed queue."""
+    if queue_name:
+        return FailedQueue(queue_name=queue_name, connection=connection)
     return FailedQueue(connection=connection)
 
 
@@ -404,8 +406,11 @@ class Queue(object):
 
 
 class FailedQueue(Queue):
-    def __init__(self, connection=None):
-        super(FailedQueue, self).__init__(JobStatus.FAILED, connection=connection)
+    def __init__(self, queue_name='', connection=None):
+        if queue_name:
+            super(FailedQueue, self).__init__(queue_name, connection=connection)
+        else:
+            super(FailedQueue, self).__init__(JobStatus.FAILED, connection=connection)
 
     def quarantine(self, job, exc_info):
         """Puts the given Job in quarantine (i.e. put it on the failed

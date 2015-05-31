@@ -122,7 +122,7 @@ class Worker(object):
 
     def __init__(self, queues, name=None,
                  default_result_ttl=None, connection=None,
-                 exc_handler=None, default_worker_ttl=None, job_class=None):  # noqa
+                 exc_handler=None, default_worker_ttl=None, job_class=None, failed_queue_name=None):  # noqa
         if connection is None:
             connection = get_current_connection()
         self.connection = connection
@@ -145,7 +145,11 @@ class Worker(object):
         self._horse_pid = 0
         self._stopped = False
         self.log = logger
-        self.failed_queue = get_failed_queue(connection=self.connection)
+
+        if failed_queue_name:
+            self.failed_queue = get_failed_queue(queue_name=failed_queue_name, connection=self.connection)
+        else:
+            self.failed_queue = get_failed_queue(connection=self.connection)
         self.maintenance_date = None
 
         # By default, push the "move-to-failed-queue" exception handler onto
